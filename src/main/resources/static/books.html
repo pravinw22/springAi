@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Recommendations</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .genre-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 40px;
+            padding: 0 20px;
+        }
+
+        .genre-btn {
+            padding: 12px 24px;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .genre-btn:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-2px);
+        }
+
+        .genre-btn.active {
+            background: white;
+            color: #667eea;
+            border-color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            padding: 0 20px;
+        }
+
+        .book-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeIn 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .book-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .book-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .book-author {
+            font-size: 0.95rem;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .book-author::before {
+            content: '✍️';
+            font-size: 0.9rem;
+        }
+
+        .book-summary {
+            font-size: 0.95rem;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: white;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: rgba(255,100,100,0.9);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: white;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .nav-links {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .nav-links a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            padding: 10px 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            transition: all 0.3s;
+            margin: 0 5px;
+            display: inline-block;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8rem; }
+            .books-grid { grid-template-columns: 1fr; padding: 0 10px; }
+            .genre-btn { padding: 10px 18px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-links">
+            <a href="index.html">💬 Chat</a>
+            <a href="books.html">📚 Books</a>
+        </div>
+
+        <h1>📚 Book Recommendations</h1>
+        <p class="subtitle">Discover your next great read, curated by AI</p>
+
+        <div class="genre-bar" id="genreBar">
+            <button class="genre-btn active" data-genre="fiction">Fiction</button>
+            <button class="genre-btn" data-genre="mystery">Mystery</button>
+            <button class="genre-btn" data-genre="sci-fi">Sci-Fi</button>
+            <button class="genre-btn" data-genre="fantasy">Fantasy</button>
+            <button class="genre-btn" data-genre="biography">Biography</button>
+            <button class="genre-btn" data-genre="history">History</button>
+            <button class="genre-btn" data-genre="romance">Romance</button>
+            <button class="genre-btn" data-genre="thriller">Thriller</button>
+            <button class="genre-btn" data-genre="artificial intelligence and machine learning">🤖 AI/ML</button>
+            <button class="genre-btn" data-genre="self-help and personal development">🌱 Self-Help</button>
+            <button class="genre-btn" data-genre="business and entrepreneurship">💼 Business</button>
+            <button class="genre-btn" data-genre="psychology">🧠 Psychology</button>
+            <button class="genre-btn" data-genre="philosophy">📖 Philosophy</button>
+            <button class="genre-btn" data-genre="science">🔬 Science</button>
+            <button class="genre-btn" data-genre="technology">💻 Technology</button>
+        </div>
+
+        <div id="booksContainer">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Fetching recommendations...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const booksContainer = document.getElementById('booksContainer');
+        const genreButtons = document.querySelectorAll('.genre-btn');
+        let currentGenre = 'fiction';
+
+        // Genre button click handlers
+        genreButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                genreButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentGenre = btn.dataset.genre;
+                fetchBooks(currentGenre);
+            });
+        });
+
+        function showLoading() {
+            booksContainer.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Fetching recommendations...</p>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            booksContainer.innerHTML = `
+                <div class="error-message">
+                    <p>⚠️ ${message}</p>
+                </div>
+            `;
+        }
+
+        function renderBooks(books) {
+            if (!books || books.length === 0) {
+                booksContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📖</div>
+                        <p>No books found. Try another genre!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const grid = document.createElement('div');
+            grid.className = 'books-grid';
+
+            books.forEach((book, index) => {
+                const card = document.createElement('div');
+                card.className = 'book-card';
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.innerHTML = `
+                    <div class="book-title">${escapeHtml(book.title || 'Unknown Title')}</div>
+                    <div class="book-author">${escapeHtml(book.author || 'Unknown Author')}</div>
+                    <div class="book-summary">${escapeHtml(book.summary || 'No summary available.')}</div>
+                `;
+                grid.appendChild(card);
+            });
+
+            booksContainer.innerHTML = '';
+            booksContainer.appendChild(grid);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function fetchBooks(genre) {
+            showLoading();
+
+            try {
+                const response = await fetch(`/api/ollama/books?genre=${encodeURIComponent(genre)}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to fetch books');
+                }
+
+                // Parse the books JSON from the response
+                let books = [];
+                try {
+                    const booksData = typeof data.books === 'string' ? JSON.parse(data.books) : data.books;
+                    books = Array.isArray(booksData) ? booksData : [];
+                } catch (e) {
+                    console.error('Failed to parse books:', e);
+                    // Try to extract JSON from text response
+                    const text = data.books || '';
+                    const match = text.match(/\[[\s\S]*\]/);
+                    if (match) {
+                        books = JSON.parse(match[0]);
+                    }
+                }
+
+                renderBooks(books);
+            } catch (error) {
+                showError('Failed to load recommendations: ' + error.message);
+            }
+        }
+
+        // Load initial books
+        fetchBooks(currentGenre);
+    </script>
+</body>
+</html>
